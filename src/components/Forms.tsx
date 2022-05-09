@@ -1,11 +1,18 @@
-import React from "react";
+import React, {SyntheticEvent} from "react";
+
 
 export default function Forms() {
-  const [file, setFile] = React.useState();
-  const [fileName, setFileName] = React.useState();
+  const [fileList, setFileList] = React.useState<FileList | null>(null);
 
-  function submit() {
-    console.log("Submit");
+  // React.InputHTMLAttributes<HTMLInputElement>.onChange?: React.ChangeEventHandler<HTMLInputElement>
+  function handleChange(e : React.FormEvent<HTMLInputElement>){
+      setFileList(e.currentTarget.files)
+  }
+  function submit(e : any ) {
+      // 1. create form data and append every file to form data 
+      // 2. send post request to server
+      let formdata = new FormData()
+      
   }
   return (
     <div className="flex flex-row justify-center p-3">
@@ -36,10 +43,11 @@ export default function Forms() {
                 hover:file:bg-orange-300 py-3"
             type="file"
             multiple
+            onChange={(e) => setFileList(e.currentTarget.files)}
           />
-            <button type="submit" 
+            <button type="button" 
             className="bg-slate-900 rounded-lg p-2 hover:bg-slate-100 hover:border-2 hover:border-slate-700 hover:text-slate-600 active:bg-slate-400 text-stone-100 text-lg" 
-            onClick={submit}>Press to Upload</button>
+            onClick={(e)=>{submit(e)}}>Press to Upload</button>
         </div>
 
       </form>
