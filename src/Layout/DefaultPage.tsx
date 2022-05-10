@@ -7,7 +7,7 @@ export default function DefaultPage(props : {children: | React.ReactNode | null 
   return (
     <>
         <NavBar />
-        {props.children}
+          {props.children}
         <Footnote></Footnote>
     </>
   )
