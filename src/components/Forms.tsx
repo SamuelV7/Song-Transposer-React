@@ -11,7 +11,7 @@ export default function Forms() {
   }
 
   function submit(e : any) {
-    e.preventDefault()
+    // e.preventDefault()
     // 1. create form data and append every file to form data
     // 2. send post request to server
     let formdata = new FormData();
@@ -21,18 +21,15 @@ export default function Forms() {
         let tmpList : FileList = fileList!
         formdata.append("files", tmpList[i])
     }
-
+    postData("http://localhost:3001/upload", formdata)
     //console.log(formdata.forEach(x => console.log(x)))
   }
 
   function postData(url : string, formData : FormData){
     fetch(url, {
-      method: 'POST',
-      headers: {
-        "Content-Type": "multipart/form-data"
-      },
+      method: "POST",
       body: formData
-    })
+    }).then((x)=>console.log(x))
   }
 
   return (

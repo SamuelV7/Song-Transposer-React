@@ -2,28 +2,165 @@ package main
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"io/fs"
+	"io/ioutil"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"os/exec"
+	"runtime"
+	"time"
+	// "os/exec"
 )
+
+type fileAndTranspose struct {
+	fileName string
+	tranpose string
+}
+type tester struct {
+	name string `json:"Name"`
+}
 
 //go:embed build
 var content embed.FS
 
-func getFileSystem() http.FileSystem{
+func getFileSystem() http.FileSystem {
 	fsys, err := fs.Sub(content, "build")
-	if err != nil{
-		panic(err)
+	if err != nil {
+		fmt.Println(err)
 	}
 	return http.FS(fsys)
 }
+func addTimeToFileName(fileName string) string {
+	dt := time.Now()
+	dtString := dt.Format("01-02-2006 15:04:05 Monday")
+	newName := dtString + "-" + fileName
+	return newName
+}
+
+func multipleFiles(r *http.Request) []fileAndTranspose {
+	// setting the max size
+	err := r.ParseMultipartForm(200 << 20)
+	// fmt.Println(r)
+	// handle err
+	if err != nil {
+		fmt.Println(err)
+	}
+	var fileNameList []fileAndTranspose
+	// list of files from the form
+	// fmt.Println(r.MultipartForm)
+	// iterate through them
+	for _, fh := range r.MultipartForm.File["files"] {
+		// fmt.Println(fh)
+		// append files to lise
+
+		// printing to console, fileName, size, and header
+		fmt.Printf("Uploaded File: %+v\n", fh.Filename)
+		fmt.Printf("FileSize: %+v\n", fh.Size)
+		fmt.Printf("MIME Header: %+v\n", fh.Header)
+		// add timeToFileName
+		tempFileName := addTimeToFileName(fh.Filename)
+		fileNameList = append(fileNameList, fileAndTranspose{fileName: tempFileName, tranpose: "3"})
+		// create and Write each File
+		//getting the file from file.Header
+		theFile, _ := fh.Open()
+		// passing the file along with the file name to save it as
+		createAndWriteFile("files/"+tempFileName, theFile)
+		fmt.Println("Successfully created the file")
+
+		//change this so we process the pdf and extract text
+		//getTextAndTranspose(tempFileName, )
+		// print each one of the files
+	}
+	return fileNameList
+}
+func transposeAndJsonify(fileList []fileAndTranspose) []byte {
+	resp := make(map[string]string)
+	for _, file := range fileList {
+		chords := getTextAndTranspose("files/"+file.fileName, file.tranpose)
+		resp[file.fileName] = chords
+	}
+	resp["checker"] = "SOLI DEO GLORIA"
+	jsonResp, err := json.Marshal(resp)
+	if err != nil {
+		fmt.Printf("Error happened in JSON marshal. Err: %s", err)
+	}
+	return jsonResp
+}
+
+// need to refactor code into smaller function
+func pdfFileUpload(res http.ResponseWriter, r *http.Request) {
+	fmt.Println("File upload endpoint")
+	if r.Method == "GET" {
+		fileByte, _ := content.ReadFile("index.html")
+		res.Write(fileByte)
+		return
+	}
+	if r.Method == "POST" {
+		//data := tester{name: "Soli Deo Gloria"}
+		fmt.Println("POST")
+		// theFiles := multipleFiles(r)
+		res.Header().Set("Content-Type", "application/json")
+		res.WriteHeader(http.StatusOK)
+		// jsonData := []byte(`{"text":"SOLI DEO GLORIA! 777"}`)
+		files := multipleFiles(r)
+		jsonByte := transposeAndJsonify(files)
+		res.Write(jsonByte)
+
+		// json := transposeAndJsonify(theFiles)
+		fmt.Println("END OF POST")
+		return
+	}
+}
+
+func createAndWriteFile(theFileName string, file multipart.File) {
+	fmt.Println(theFileName)
+	f, err := os.Create(theFileName)
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println("TEMPFILE CREATION ERROR")
+	}
+	//Reading the file into byte Array
+	defer file.Close()
+	fileBytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		fmt.Println("There was an error reading file into fileByes")
+		fmt.Print(err)
+	}
+	defer f.Close()
+	f.Write(fileBytes)
+	//Write the file into temp from byte array
+
+	fmt.Println("Successfully saved file")
+}
+
+func hostOS() string {
+	theOS := runtime.GOOS
+	switch theOS{
+	case "darwin":
+		return "MacOS"
+	case "windows":
+		return "Microsoft Windows"
+	case "linux":
+		return "Linux"
+	}
+	return theOS
+}
+func getTextAndTranspose(filePath string, transpose string) string {
+	output, _ := exec.Command("python3", "transpose/transpose.py", filePath, transpose).CombinedOutput()
+	fmt.Println(string(output))
+	return string(output)
+}
 
 func main() {
+	//getTextAndTranspose("transpose/he_who_is_mighty-a-guitar.pdf", "3")
+	port := ":3001"
 	os := hostOS()
-	fmt.Printf("Starting Server %s", os)
-	handler := http.FileServer(getFileSystem())
-	
+	fmt.Printf("Starting Server on %s %s \n", os, port)
+
+	http.Handle("/", http.FileServer(getFileSystem()))
 	http.HandleFunc("/upload", pdfFileUpload)
-	
-	http.ListenAndServe(":3001", handler)
+	http.ListenAndServe(port, nil)
 }
