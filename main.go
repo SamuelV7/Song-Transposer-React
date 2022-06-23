@@ -80,7 +80,7 @@ func transposeAndJsonify(fileList []fileAndTranspose) []byte {
 	resp := make(map[string]string)
 	for _, file := range fileList {
 		chords := getTextAndTranspose("files/"+file.fileName, file.tranpose)
-		resp[file.fileName] = chords
+		resp["text"] = chords
 	}
 	// resp["checker"] = "SOLI DEO GLORIA"
 	jsonResp, err := json.Marshal(resp)

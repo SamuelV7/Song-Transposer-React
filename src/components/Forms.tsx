@@ -1,16 +1,18 @@
 import React from "react";
+import { Context } from "../App";
 
 export default function Forms() {
   const [fileList, setFileList] = React.useState<FileList | null>();
   const [nameOfSong, setNameOfSong] = React.useState<String | null>("");
   const [nameOfAuthor, setNameOfAuthor] = React.useState<String | null>("");
+  const [context, setContext] = React.useContext(Context);
 
   // React.InputHTMLAttributes<HTMLInputElement>.onChange?: React.ChangeEventHandler<HTMLInputElement>
   function handleChange(e: React.FormEvent<HTMLInputElement>) {
     setFileList(e.currentTarget.files);
   }
 
-  function submit(e : any) {
+  async function submit(e : any) {
     // e.preventDefault()
     // 1. create form data and append every file to form data
     // 2. send post request to server
@@ -21,15 +23,15 @@ export default function Forms() {
         let tmpList : FileList = fileList!
         formdata.append("files", tmpList[i])
     }
-    postData("http://localhost:3001/upload", formdata)
-    //console.log(formdata.forEach(x => console.log(x)))
+    let api_Data = await postData("http://localhost:3001/upload", formdata);
+    await setContext(api_Data);
+    return
   }
 
-  function postData(url : string, formData : FormData){
-    fetch(url, {
-      method: "POST",
-      body: formData
-    }).then((x)=>x.json().then(x => console.log(x)))
+  async function postData(url : string, formData : FormData) : Promise<any>{
+    let data = await fetch(url, {method: "POST", body: formData})
+    let json = await data.json()
+    return json
   }
 
   return (
