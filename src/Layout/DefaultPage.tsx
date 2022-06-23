@@ -8,7 +8,6 @@ export default function DefaultPage(props : {children: | React.ReactNode | null 
     <>
         <NavBar />
           {props.children}
-        <Footnote></Footnote>
     </>
   )
 }
