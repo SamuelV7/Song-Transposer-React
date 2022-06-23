@@ -29,7 +29,7 @@ export default function Forms() {
     fetch(url, {
       method: "POST",
       body: formData
-    }).then((x)=>console.log(x))
+    }).then((x)=>x.json().then(x => console.log(x)))
   }
 
   return (

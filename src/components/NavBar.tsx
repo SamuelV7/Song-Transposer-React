@@ -1,6 +1,5 @@
 import React from 'react'
 import NavItem from './NavItem'
-
 export default function NavBar() {
   // const [navBarOpen, setNavBarOpen] = React.useState(false)
   return (
@@ -10,6 +9,7 @@ export default function NavBar() {
           <NavItem link='/' name='Home'/>
           <NavItem link='/Songs' name='Songs' />
           <NavItem link='/Upload' name='Upload' />
+          <NavItem link="/LyricsChord" name='Lyrics'/>
         </div> 
       </div>
     </nav>

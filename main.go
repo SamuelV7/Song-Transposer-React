@@ -82,7 +82,7 @@ func transposeAndJsonify(fileList []fileAndTranspose) []byte {
 		chords := getTextAndTranspose("files/"+file.fileName, file.tranpose)
 		resp[file.fileName] = chords
 	}
-	resp["checker"] = "SOLI DEO GLORIA"
+	// resp["checker"] = "SOLI DEO GLORIA"
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
 		fmt.Printf("Error happened in JSON marshal. Err: %s", err)
@@ -111,6 +111,7 @@ func pdfFileUpload(res http.ResponseWriter, r *http.Request) {
 
 		// json := transposeAndJsonify(theFiles)
 		fmt.Println("END OF POST")
+		// fmt.Println(jsonByte)
 		return
 	}
 }

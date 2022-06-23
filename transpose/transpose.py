@@ -4,9 +4,7 @@ from pychord import Chord
 import argparse
 
 def get_pdf(path):
-    with pdfplumber.open(path) as pdf:
-        first_page = pdf.pages[0]
-        print(first_page.chars[0])
+    pdf = pdfplumber.open(path)
     return pdf
 
 
@@ -59,10 +57,3 @@ if __name__ == "__main__":
 
     output = pdf_transpose(the_input_args.file, int(the_input_args.transpose))
     print(output)
-
-    # if the_input_args.type == "text":
-    #     output = transpose_text(the_input_args.text, int(the_input_args.transpose))
-    #     print(output)
-    # elif the_input_args.type == "pdf":
-    #     output = pdf_transpose(path="./"+the_input_args.file, transpose_int=int(the_input_args.transpose))
-    #     print(output)
