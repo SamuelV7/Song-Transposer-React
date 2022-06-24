@@ -1,30 +1,33 @@
 import React from "react";
 import { Context } from "../App";
+import { useNavigate } from "react-router-dom";
+import LyricsChord from "../Pages/LyricsChord";
 
 export default function Forms() {
   const [fileList, setFileList] = React.useState<FileList | null>();
-  const [nameOfSong, setNameOfSong] = React.useState<String | null>("");
-  const [nameOfAuthor, setNameOfAuthor] = React.useState<String | null>("");
+  const [transposeTo, setTransposeTo] = React.useState<String | null>("");
   const [context, setContext] = React.useContext(Context);
 
   // React.InputHTMLAttributes<HTMLInputElement>.onChange?: React.ChangeEventHandler<HTMLInputElement>
   function handleChange(e: React.FormEvent<HTMLInputElement>) {
     setFileList(e.currentTarget.files);
   }
-
+  let navigate = useNavigate();
   async function submit(e : any) {
+    
     // e.preventDefault()
     // 1. create form data and append every file to form data
     // 2. send post request to server
     let formdata = new FormData();
-    formdata.append("Song Name", nameOfSong as any);
-    formdata.append("Song Writer", nameOfAuthor as any);
+    formdata.append("transpose", transposeTo as any);
+    // formdata.append("Song Writer", nameOfAuthor as any);
     for (let i = 0; i < fileList!.length; i++) {
         let tmpList : FileList = fileList!
         formdata.append("files", tmpList[i])
     }
     let api_Data = await postData("http://localhost:3001/upload", formdata);
     await setContext(api_Data);
+    navigate("../view", {replace: false})
     return
   }
 
@@ -38,22 +41,13 @@ export default function Forms() {
     <div className="flex flex-row justify-center p-3">
       <form className="bg-slate-50 rounded-xl flex flex-col p-5">
         <div className="">
-          <label className="text-lg float-left"> Name of the song </label>
+          <label className="text-lg float-left"> Transpose by eg +1/-1 </label>
           <input
             className="border border-orange-500 w-full focus:border-2 focus:border-orange-700 rounded-lg"
             type="text"
             name="name"
             onChange={(e) => {
-              setNameOfSong(e.target.value);
-            }}
-          />
-          <label className="text-lg float-left"> Song Writer's Name </label>
-          <input
-            className="border border-orange-500 w-full focus:border-2  focus:border-orange-700 rounded-lg"
-            type="text"
-            name="name"
-            onChange={(e) => {
-              setNameOfAuthor(e.target.value);
+              setTransposeTo(e.target.value);
             }}
           />
         </div>

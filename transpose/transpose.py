@@ -4,6 +4,7 @@ from pychord import Chord
 import argparse
 import json
 
+
 def get_pdf(path):
     pdf = pdfplumber.open(path)
     return pdf
@@ -17,12 +18,15 @@ def valid_chord(chord_potential):
         return False
 
 
-def extract_pages_text(pdf_object): return [pages.extract_text() for pages in pdf_object.pages]
+def extract_pages_text(pdf_object): return [
+    pages.extract_text() for pages in pdf_object.pages]
 
 
 def is_it_chord_line(line_of_chord_or_text: str):
-    chords = [text for text in line_of_chord_or_text.split(" ") if valid_chord(text)]
-    not_chords = [text for text in line_of_chord_or_text.split(" ") if not valid_chord(text) and text != ""]
+    chords = [text for text in line_of_chord_or_text.split(
+        " ") if valid_chord(text)]
+    not_chords = [text for text in line_of_chord_or_text.split(
+        " ") if not valid_chord(text) and text != ""]
     return len(chords) > len(not_chords)
 
 
@@ -48,11 +52,15 @@ def pdf_transpose(path: str, transpose_int: int):
     newList = transpose_text(the_texts[0], transpose_int)
     return json.dumps(newList)
 
+
 if __name__ == "__main__":
     # arguments, file to transpose and how much steps to transpose
-    parser = argparse.ArgumentParser(description='gets text of pdf and transposes if it finds chords in text')
-    parser.add_argument('file', metavar='file', type=str, help='enter file location')
-    parser.add_argument('transpose', metavar='transpose', type=str, help='by how many semitones do you wanna transpose')
+    parser = argparse.ArgumentParser(
+        description='gets text of pdf and transposes if it finds chords in text')
+    parser.add_argument('file', metavar='file', type=str,
+                        help='enter file location')
+    parser.add_argument('transpose', metavar='transpose', type=str,
+                        help='by how many semitones do you wanna transpose')
     the_input_args = parser.parse_args()
 
     output = pdf_transpose(the_input_args.file, int(the_input_args.transpose))

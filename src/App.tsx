@@ -10,13 +10,11 @@ function App() {
   const [context, setContext] = React.useState("default context value");
   return (
     <Context.Provider value={[context, setContext]}>
-    {/* <BrowserRouter> */}
-      {/* <Routes> */}
-      <SwitchToView/>
-        {/* <Route path="/" element={<HomePage />} />
-        <Route path="/view" element={< SwitchToView />} /> */}
-      {/* </Routes> */}
-    {/* </BrowserRouter> */}
+      {/* <SwitchToView/> */}
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="view" element={< SwitchToView />} />
+      </Routes>
     </Context.Provider>
   );
 }

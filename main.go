@@ -19,9 +19,6 @@ type fileAndTranspose struct {
 	fileName string
 	tranpose string
 }
-type tester struct {
-	name string `json:"Name"`
-}
 
 //go:embed build
 var content embed.FS
@@ -49,20 +46,20 @@ func multipleFiles(r *http.Request) []fileAndTranspose {
 		fmt.Println(err)
 	}
 	var fileNameList []fileAndTranspose
+	value := r.FormValue("transpose")
 	// list of files from the form
 	// fmt.Println(r.MultipartForm)
 	// iterate through them
 	for _, fh := range r.MultipartForm.File["files"] {
 		// fmt.Println(fh)
 		// append files to lise
-
 		// printing to console, fileName, size, and header
 		fmt.Printf("Uploaded File: %+v\n", fh.Filename)
 		fmt.Printf("FileSize: %+v\n", fh.Size)
 		fmt.Printf("MIME Header: %+v\n", fh.Header)
 		// add timeToFileName
 		tempFileName := addTimeToFileName(fh.Filename)
-		fileNameList = append(fileNameList, fileAndTranspose{fileName: tempFileName, tranpose: "3"})
+		fileNameList = append(fileNameList, fileAndTranspose{fileName: tempFileName, tranpose: value})
 		// create and Write each File
 		//getting the file from file.Header
 		theFile, _ := fh.Open()
@@ -151,7 +148,7 @@ func hostOS() string {
 }
 func getTextAndTranspose(filePath string, transpose string) string {
 	output, _ := exec.Command("python3", "transpose/transpose.py", filePath, transpose).CombinedOutput()
-	fmt.Println(string(output))
+	// fmt.Println(string(output))
 	return string(output)
 }
 
