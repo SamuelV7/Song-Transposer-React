@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"io/fs"
 	"io/ioutil"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"os/exec"
 	"runtime"
-	"time"
-	// "os/exec"
+	"path/filepath"
 )
 
 type fileAndTranspose struct {
@@ -30,12 +30,7 @@ func getFileSystem() http.FileSystem {
 	}
 	return http.FS(fsys)
 }
-func addTimeToFileName(fileName string) string {
-	dt := time.Now()
-	dtString := dt.Format("01-02-2006 15:04:05 Monday")
-	newName := dtString + "-" + fileName
-	return newName
-}
+
 
 func multipleFiles(r *http.Request) []fileAndTranspose {
 	// setting the max size
@@ -58,25 +53,26 @@ func multipleFiles(r *http.Request) []fileAndTranspose {
 		fmt.Printf("FileSize: %+v\n", fh.Size)
 		fmt.Printf("MIME Header: %+v\n", fh.Header)
 		// add timeToFileName
-		tempFileName := addTimeToFileName(fh.Filename)
-		fileNameList = append(fileNameList, fileAndTranspose{fileName: tempFileName, tranpose: value})
+		// tempFileName := addTimeToFileName(fh.Filename)
+		fileNameList = append(fileNameList, fileAndTranspose{fileName: fh.Filename, tranpose: value})
 		// create and Write each File
 		//getting the file from file.Header
 		theFile, _ := fh.Open()
 		// passing the file along with the file name to save it as
-		createAndWriteFile("files/"+tempFileName, theFile)
+		createAndWriteFile(getFullPath(fh.Filename), theFile)
 		fmt.Println("Successfully created the file")
-
+		
 		//change this so we process the pdf and extract text
 		//getTextAndTranspose(tempFileName, )
 		// print each one of the files
 	}
+	fmt.Println("End Of loop")
 	return fileNameList
 }
 func transposeAndJsonify(fileList []fileAndTranspose) []byte {
 	resp := make(map[string]string)
 	for _, file := range fileList {
-		chords := getTextAndTranspose("files/"+file.fileName, file.tranpose)
+		chords := getTextAndTranspose(file.fileName, file.tranpose)
 		resp["text"] = chords
 	}
 	// resp["checker"] = "SOLI DEO GLORIA"
@@ -103,6 +99,7 @@ func pdfFileUpload(res http.ResponseWriter, r *http.Request) {
 		res.WriteHeader(http.StatusOK)
 		// jsonData := []byte(`{"text":"SOLI DEO GLORIA! 777"}`)
 		files := multipleFiles(r)
+		fmt.Println("Herer")
 		jsonByte := transposeAndJsonify(files)
 		res.Write(jsonByte)
 
@@ -114,8 +111,10 @@ func pdfFileUpload(res http.ResponseWriter, r *http.Request) {
 }
 
 func createAndWriteFile(theFileName string, file multipart.File) {
-	fmt.Println(theFileName)
-	f, err := os.Create(theFileName)
+	// fmt.Println(theFileName, "FileName not ABS")
+	absPath := getFullPath(theFileName)
+	fmt.Println(absPath)
+	f, err := os.Create("/app/temp/"+theFileName)
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println("TEMPFILE CREATION ERROR")
@@ -128,7 +127,11 @@ func createAndWriteFile(theFileName string, file multipart.File) {
 		fmt.Print(err)
 	}
 	defer f.Close()
-	f.Write(fileBytes)
+	_, err = f.Write(fileBytes)
+	if err != nil {
+		fmt.Println("There was an error writing fileBytes to temp file")
+		log.Fatalln(err)
+	}
 	//Write the file into temp from byte array
 
 	fmt.Println("Successfully saved file")
@@ -147,13 +150,29 @@ func hostOS() string {
 	return theOS
 }
 func getTextAndTranspose(filePath string, transpose string) string {
-	output, _ := exec.Command("python3", "transpose/transpose.py", filePath, transpose).CombinedOutput()
+	thePath := getFullPath("/app/temp/"+filePath)
+	command := exec.Command("python3", "/app/transpose.py", thePath, transpose)
+	// fmt.Println(command,"Command Struct")
+	output, err := command.CombinedOutput()
+	if err != nil {
+		fmt.Println(err, "Error with calling python script")
+	}
+
+	fmt.Println("Output: ", string(output))
 	// fmt.Println(string(output))
 	return string(output)
 }
 
+func getFullPath(path string) string {
+	thePath, err := filepath.Abs(path)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return thePath
+}
+
 func main() {
-	//getTextAndTranspose("transpose/he_who_is_mighty-a-guitar.pdf", "3")
+	getTextAndTranspose("he_who_is_mighty-a-guitar.pdf", "3")
 	port := ":3001"
 	os := hostOS()
 	fmt.Printf("Starting Server on %s %s \n", os, port)

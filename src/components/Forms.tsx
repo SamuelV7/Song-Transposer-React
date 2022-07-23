@@ -25,7 +25,7 @@ export default function Forms() {
         let tmpList : FileList = fileList!
         formdata.append("files", tmpList[i])
     }
-    let api_Data = await postData("http://localhost:3001/upload", formdata);
+    let api_Data = await postData("upload", formdata);
     await setContext(api_Data);
     navigate("../view", {replace: false})
     return
