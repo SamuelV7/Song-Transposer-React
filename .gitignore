@@ -5,11 +5,15 @@
 /.pnp
 .pnp.js
 
+*.pdf
 # testing
 /coverage
 /.idea
 # production
 /build
+
+
+/.vscode
 
 # misc
 .DS_Store
