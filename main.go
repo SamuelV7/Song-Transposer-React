@@ -151,7 +151,7 @@ func hostOS() string {
 }
 func getTextAndTranspose(filePath string, transpose string) string {
 	thePath := getFullPath("/app/temp/"+filePath)
-	command := exec.Command("python3", "/app/transpose.py", thePath, transpose)
+	command := exec.Command("python", "/app/transpose.py", thePath, transpose)
 	// fmt.Println(command,"Command Struct")
 	output, err := command.CombinedOutput()
 	if err != nil {
@@ -173,7 +173,7 @@ func getFullPath(path string) string {
 
 func main() {
 	getTextAndTranspose("he_who_is_mighty-a-guitar.pdf", "3")
-	port := ":3001"
+	port := ":8080"
 	os := hostOS()
 	fmt.Printf("Starting Server on %s %s \n", os, port)
 
