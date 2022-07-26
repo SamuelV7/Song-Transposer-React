@@ -1,4 +1,3 @@
-from cgi import print_arguments
 import pdfplumber
 from pychord import Chord
 import argparse
