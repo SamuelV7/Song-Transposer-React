@@ -31,16 +31,13 @@ COPY transpose .
 
 # Install python dependencies needed for python in apline
 WORKDIR /
-RUN apk add --no-cache jpeg-dev zlib-dev
-RUN apk add --update --no-cache --virtual .tmp-build-deps \
+RUN apk add --no-cache jpeg-dev zlib-dev && apk add --update --no-cache --virtual .tmp-build-deps \
     gcc libc-dev linux-headers postgresql-dev \
     && apk add libffi-dev
 
 RUN apk add --no-cache --virtual .build-deps build-base linux-headers \
     && pip install Pillow
-RUN python3 -m pip install --upgrade pip
-RUN pip install pdfplumber
-RUN pip install pychord
+RUN python3 -m pip install --upgrade pip && pip install pdfplumber && pip install pychord
 
 WORKDIR /
 ENTRYPOINT [ "/app/songChord" ]

@@ -149,6 +149,7 @@ func hostOS() string {
 	}
 	return theOS
 }
+
 func getTextAndTranspose(filePath string, transpose string) string {
 	thePath := getFullPath("/app/temp/"+filePath)
 	command := exec.Command("python", "/app/transpose.py", thePath, transpose)
@@ -157,7 +158,6 @@ func getTextAndTranspose(filePath string, transpose string) string {
 	if err != nil {
 		fmt.Println(err, "Error with calling python script")
 	}
-
 	fmt.Println("Output: ", string(output))
 	// fmt.Println(string(output))
 	return string(output)

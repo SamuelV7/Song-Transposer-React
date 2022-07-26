@@ -3,12 +3,11 @@ import pdfplumber
 from pychord import Chord
 import argparse
 import json
-
+import ocr_pdf
 
 def get_pdf(path):
     pdf = pdfplumber.open(path)
     return pdf
-
 
 def valid_chord(chord_potential):
     try:
@@ -16,7 +15,6 @@ def valid_chord(chord_potential):
         return True
     except ValueError:
         return False
-
 
 def extract_pages_text(pdf_object): return [
     pages.extract_text() for pages in pdf_object.pages]
@@ -47,9 +45,8 @@ def transpose_text(text_string: str, transpose_by: int):
 
 
 def pdf_transpose(path: str, transpose_int: int):
-    pdf_pages = get_pdf(path)
-    the_texts = extract_pages_text(pdf_pages)
-    newList = transpose_text(the_texts[0], transpose_int)
+    text = ocr_pdf.getText(path)
+    newList = transpose_text(text[0], transpose_int)
     return json.dumps(newList)
 
 
