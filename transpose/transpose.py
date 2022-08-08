@@ -1,12 +1,8 @@
-import pdfplumber
 from pychord import Chord
 import argparse
 import json
 import ocr_pdf
 
-def get_pdf(path):
-    pdf = pdfplumber.open(path)
-    return pdf
 
 def valid_chord(chord_potential):
     try:
@@ -44,7 +40,7 @@ def transpose_text(text_string: str, transpose_by: int):
 
 
 def pdf_transpose(path: str, transpose_int: int):
-    text = ocr_pdf.getText(path)
+    text = ocr_pdf.getTextArray(path)
     newList = transpose_text(text[0], transpose_int)
     return json.dumps(newList)
 

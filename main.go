@@ -23,6 +23,9 @@ type fileAndTranspose struct {
 //go:embed build
 var content embed.FS
 
+//go:embed text
+var songs embed.FS
+
 func getFileSystem() http.FileSystem {
 	fsys, err := fs.Sub(content, "build")
 	if err != nil {
@@ -66,7 +69,6 @@ func multipleFiles(r *http.Request) []fileAndTranspose {
 		//getTextAndTranspose(tempFileName, )
 		// print each one of the files
 	}
-	fmt.Println("End Of loop")
 	return fileNameList
 }
 func transposeAndJsonify(fileList []fileAndTranspose) []byte {
@@ -99,7 +101,6 @@ func pdfFileUpload(res http.ResponseWriter, r *http.Request) {
 		res.WriteHeader(http.StatusOK)
 		// jsonData := []byte(`{"text":"SOLI DEO GLORIA! 777"}`)
 		files := multipleFiles(r)
-		fmt.Println("Herer")
 		jsonByte := transposeAndJsonify(files)
 		res.Write(jsonByte)
 
@@ -123,7 +124,7 @@ func createAndWriteFile(theFileName string, file multipart.File) {
 	defer file.Close()
 	fileBytes, err := ioutil.ReadAll(file)
 	if err != nil {
-		fmt.Println("There was an error reading file into fileByes")
+		fmt.Println("There was an error reading file into fileBytes")
 		fmt.Print(err)
 	}
 	defer f.Close()
@@ -171,13 +172,64 @@ func getFullPath(path string) string {
 	return thePath
 }
 
+type songFile struct{
+	Name string `json:"Name"`
+}
+
+func files(res http.ResponseWriter, r *http.Request){
+	var song songFile
+	err := json.NewDecoder(r.Body).Decode(&song)
+	if err != nil{
+		fmt.Println(err)
+	}
+	fileBytes, err := songs.ReadFile("text/"+song.Name)
+	if err != nil {
+		fmt.Println(err)
+	}
+	chordsAndLyrics := string(fileBytes)
+	// fmt.Println(chordsAndLyrics)
+	resp := make(map[string]string)
+	resp["text"] = chordsAndLyrics
+	//convert to json 
+	songToSend, err := json.Marshal(resp)
+	if err != nil {
+		fmt.Println(err)
+	}
+	res.Write(songToSend)
+}
+
+func allSongs() []fs.DirEntry{
+	listOfSongs, err := songs.ReadDir("text")
+	if err != nil{
+		fmt.Println(err)
+	}
+	return listOfSongs
+}
+
+func songsAvailable(w http.ResponseWriter, r *http.Request){
+	theSongs := allSongs()
+	temp := []string{}
+	for _, songString := range(theSongs){
+		temp = append(temp, songString.Name())
+	}
+	//convert it to json
+	out, err := json.Marshal(temp)
+	if err != nil {
+		fmt.Println(err)
+	}
+	w.Write(out)
+}
+
 func main() {
-	getTextAndTranspose("he_who_is_mighty-a-guitar.pdf", "3")
+	// allSongs()
+	// getTextAndTranspose("he_who_is_mighty-a-guitar.pdf", "3")
 	port := ":8080"
 	os := hostOS()
 	fmt.Printf("Starting Server on %s %s \n", os, port)
 
 	http.Handle("/", http.FileServer(getFileSystem()))
+	http.HandleFunc("/song", files)
 	http.HandleFunc("/upload", pdfFileUpload)
+	http.HandleFunc("/allSongs", songsAvailable)
 	http.ListenAndServe(port, nil)
 }
