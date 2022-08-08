@@ -7,7 +7,7 @@ export default function NavBar() {
       <div className="container mx-auto">
         <div className="sm:flex justify-start">
           <NavItem link='/' name='Home'/>
-          <NavItem link='/Songs' name='Songs' />
+          <NavItem link='/showSongs' name='Songs' />
           <NavItem link='/Upload' name='Upload' />
           <NavItem link="/LyricsChord" name='Lyrics'/>
         </div> 

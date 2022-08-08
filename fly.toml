@@ -1,16 +1,13 @@
-# fly.toml file generated for songs on 2022-07-23T21:49:09+01:00
+# fly.toml file generated for singsong on 2022-07-24T16:35:46+01:00
 
-app = "songs"
+app = "singsong"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = []
 
 [mounts]
-source="songChord"
+source="temp_songs"
 destination="/app/temp"
-
-[build]
-  image = "gamingsam77/songschords:songChords"
 
 [env]
 

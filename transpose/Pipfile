@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 pdfplumber = "*"
 pychord = "*"
+pytesseract = "*"
+pdf2image = "*"
 
 [dev-packages]
 
