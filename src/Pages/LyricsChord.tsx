@@ -28,20 +28,26 @@ export default function LyricsChord() {
       case Transpose.Down:
         setContext({text: transpose(context.text).up(1).toString()})
         break;
-      default:
-        break;
+      // default:
+      //   break;
     }
   }
 
   return (
     <>
       <DefaultPage>
-        <div className="flex flex-row p-4">
-          <div>
-            <button onClick={handleTransposer(Transpose.Up)}>+</button>
-            <button onClick={handleTransposer(Transpose.Down)}>-</button>
+        <div className="flex flex-col p-4">
+          <div className="flex flex-row px-3">
+            <button className="bg-slate-900 rounded-lg p-2 hover:bg-slate-100 hover:border-2
+            hover:border-slate-700 hover:text-slate-600 active:bg-slate-400 text-stone-100 text-lg px-3"
+                    onClick={handleTransposer(Transpose.Up)}>Transpose Up +</button>
+            <button className="bg-slate-900 rounded-lg p-2 hover:bg-slate-100 hover:border-2
+            hover:border-slate-700 hover:text-slate-600 active:bg-slate-400 text-stone-100 text-lg px-3"
+                onClick={handleTransposer(Transpose.Down)}>Transpose Down -</button>
           </div>
-          <pre>{data}</pre>
+          <div>
+            <pre>{data}</pre>
+          </div>
         </div>
       </DefaultPage>
     </>

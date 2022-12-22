@@ -11,13 +11,13 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"runtime"
 	"path/filepath"
+	"runtime"
 )
 
 type fileAndTranspose struct {
-	fileName string
-	tranpose string
+	fileName  string
+	transpose string
 }
 
 //go:embed build
@@ -33,7 +33,6 @@ func getFileSystem() http.FileSystem {
 	}
 	return http.FS(fsys)
 }
-
 
 func multipleFiles(r *http.Request) []fileAndTranspose {
 	// setting the max size
@@ -57,14 +56,14 @@ func multipleFiles(r *http.Request) []fileAndTranspose {
 		fmt.Printf("MIME Header: %+v\n", fh.Header)
 		// add timeToFileName
 		// tempFileName := addTimeToFileName(fh.Filename)
-		fileNameList = append(fileNameList, fileAndTranspose{fileName: fh.Filename, tranpose: value})
+		fileNameList = append(fileNameList, fileAndTranspose{fileName: fh.Filename, transpose: value})
 		// create and Write each File
 		//getting the file from file.Header
 		theFile, _ := fh.Open()
 		// passing the file along with the file name to save it as
 		createAndWriteFile(getFullPath(fh.Filename), theFile)
 		fmt.Println("Successfully created the file")
-		
+
 		//change this so we process the pdf and extract text
 		//getTextAndTranspose(tempFileName, )
 		// print each one of the files
@@ -74,7 +73,7 @@ func multipleFiles(r *http.Request) []fileAndTranspose {
 func transposeAndJsonify(fileList []fileAndTranspose) []byte {
 	resp := make(map[string]string)
 	for _, file := range fileList {
-		chords := getTextAndTranspose(file.fileName, file.tranpose)
+		chords := getTextAndTranspose(file.fileName, file.transpose)
 		resp["text"] = chords
 	}
 	// resp["checker"] = "SOLI DEO GLORIA"
@@ -90,7 +89,10 @@ func pdfFileUpload(res http.ResponseWriter, r *http.Request) {
 	fmt.Println("File upload endpoint")
 	if r.Method == "GET" {
 		fileByte, _ := content.ReadFile("index.html")
-		res.Write(fileByte)
+		_, err := res.Write(fileByte)
+		if err != nil {
+			return
+		}
 		return
 	}
 	if r.Method == "POST" {
@@ -102,8 +104,10 @@ func pdfFileUpload(res http.ResponseWriter, r *http.Request) {
 		// jsonData := []byte(`{"text":"SOLI DEO GLORIA! 777"}`)
 		files := multipleFiles(r)
 		jsonByte := transposeAndJsonify(files)
-		res.Write(jsonByte)
-
+		_, err := res.Write(jsonByte)
+		if err != nil {
+			return
+		}
 		// json := transposeAndJsonify(theFiles)
 		fmt.Println("END OF POST")
 		// fmt.Println(jsonByte)
@@ -115,7 +119,7 @@ func createAndWriteFile(theFileName string, file multipart.File) {
 	// fmt.Println(theFileName, "FileName not ABS")
 	absPath := getFullPath(theFileName)
 	fmt.Println(absPath)
-	f, err := os.Create("/app/temp/"+theFileName)
+	f, err := os.Create("/app/temp/" + theFileName)
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println("TEMPFILE CREATION ERROR")
@@ -134,13 +138,12 @@ func createAndWriteFile(theFileName string, file multipart.File) {
 		log.Fatalln(err)
 	}
 	//Write the file into temp from byte array
-
 	fmt.Println("Successfully saved file")
 }
 
 func hostOS() string {
 	theOS := runtime.GOOS
-	switch theOS{
+	switch theOS {
 	case "darwin":
 		return "MacOS"
 	case "windows":
@@ -152,7 +155,7 @@ func hostOS() string {
 }
 
 func getTextAndTranspose(filePath string, transpose string) string {
-	thePath := getFullPath("/app/temp/"+filePath)
+	thePath := getFullPath("/app/temp/" + filePath)
 	command := exec.Command("python", "/app/transpose.py", thePath, transpose)
 	// fmt.Println(command,"Command Struct")
 	output, err := command.CombinedOutput()
@@ -172,17 +175,17 @@ func getFullPath(path string) string {
 	return thePath
 }
 
-type songFile struct{
+type songFile struct {
 	Name string `json:"Name"`
 }
 
-func files(res http.ResponseWriter, r *http.Request){
+func files(res http.ResponseWriter, r *http.Request) {
 	var song songFile
 	err := json.NewDecoder(r.Body).Decode(&song)
-	if err != nil{
+	if err != nil {
 		fmt.Println(err)
 	}
-	fileBytes, err := songs.ReadFile("text/"+song.Name)
+	fileBytes, err := songs.ReadFile("text/" + song.Name)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -190,26 +193,29 @@ func files(res http.ResponseWriter, r *http.Request){
 	// fmt.Println(chordsAndLyrics)
 	resp := make(map[string]string)
 	resp["text"] = chordsAndLyrics
-	//convert to json 
+	//convert to json
 	songToSend, err := json.Marshal(resp)
 	if err != nil {
 		fmt.Println(err)
 	}
-	res.Write(songToSend)
+	_, err = res.Write(songToSend)
+	if err != nil {
+		return
+	}
 }
 
-func allSongs() []fs.DirEntry{
+func allSongs() []fs.DirEntry {
 	listOfSongs, err := songs.ReadDir("text")
-	if err != nil{
+	if err != nil {
 		fmt.Println(err)
 	}
 	return listOfSongs
 }
 
-func songsAvailable(w http.ResponseWriter, r *http.Request){
+func songsAvailable(w http.ResponseWriter, r *http.Request) {
 	theSongs := allSongs()
-	temp := []string{}
-	for _, songString := range(theSongs){
+	var temp []string
+	for _, songString := range theSongs {
 		temp = append(temp, songString.Name())
 	}
 	//convert it to json
@@ -224,8 +230,8 @@ func main() {
 	// allSongs()
 	// getTextAndTranspose("he_who_is_mighty-a-guitar.pdf", "3")
 	port := ":8080"
-	os := hostOS()
-	fmt.Printf("Starting Server on %s %s \n", os, port)
+	theOS := hostOS()
+	fmt.Printf("Starting Server on %s %s \n", theOS, port)
 
 	http.Handle("/", http.FileServer(getFileSystem()))
 	http.HandleFunc("/song", files)

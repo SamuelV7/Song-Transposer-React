@@ -6,10 +6,9 @@ export default function NavBar() {
     <nav className="bg-slate-900 shadow-lg ">
       <div className="container mx-auto">
         <div className="sm:flex justify-start">
-          <NavItem link='/' name='Home'/>
-          <NavItem link='/showSongs' name='Songs' />
-          <NavItem link='/Upload' name='Upload' />
-          <NavItem link="/LyricsChord" name='Lyrics'/>
+          <NavItem link='/' name='Songs'/>
+          <NavItem link='/uploadFiles' name='Upload' />
+          {/*<NavItem link="/LyricsChord" name='Lyrics'/>*/}
         </div> 
       </div>
     </nav>

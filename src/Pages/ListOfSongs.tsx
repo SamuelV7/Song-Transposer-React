@@ -1,13 +1,12 @@
-import React, { useEffect } from 'react'
-import {useNavigate } from 'react-router-dom'
-import { Context } from "../App"
-
+import React, {useEffect} from 'react'
+import {useNavigate} from 'react-router-dom'
+import {Context} from "../App"
+import DefaultPage from "../Layout/DefaultPage";
 type Props = {}
 
 async function getAllSongs() {
     let data = await fetch("/allSongs");
-    let json = await data.json();
-    return json;
+    return await data.json();
 }
 
 async function getSpecificSong(theSong: String){
@@ -16,12 +15,10 @@ async function getSpecificSong(theSong: String){
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
-            // 'Content-Type': 'application/x-www-form-urlencoded',
           },
         body: JSON.stringify(jsonToSend)
     })
-    let jsonRes = await song.json()
-    return jsonRes
+    return await song.json()
 }
 
 export default function ListOfSongs({}: Props) {
@@ -40,15 +37,23 @@ export default function ListOfSongs({}: Props) {
     useEffect(()=>{
         getAllSongs().then((data) => {
             let htmlTags = data.map((item : String) => {
-                return <p key={item.toString()}  onClick={handler(item.toString())}>{item}</p>
+                return (
+                <div className="border rounded orange-slate-500 bg-slate-100 hover:bg-slate-300">
+                    <p className="px-4 py-3" key={item.toString()}  onClick={handler(item.toString())}>{item}</p>
+                </div>
+                )
             })
             setSongs(htmlTags)
         })
     },[])
   return (
     <>
-        <div>ListOfSongs</div>
-        <div>{songs}</div>
+        <DefaultPage>
+            <div className="flex px-4">
+                <h4 className=" p-4 ">List Of Songs</h4>
+                <div>{songs}</div>
+            </div>
+        </DefaultPage>
     </>
   )
 }

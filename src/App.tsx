@@ -1,7 +1,7 @@
 import React from "react";
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
-import HomePage from "./Pages/HomePage";
+import UploadFiles from "./Pages/UploadFiles";
 import SwitchToView from "./Pages/SwitchToView";
 import ListOfSongs from "./Pages/ListOfSongs";
 
@@ -12,8 +12,8 @@ function App() {
   return (
     <Context.Provider value={[context, setContext]}>
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/showSongs" element={<ListOfSongs/>} />
+        <Route path="/" element={<ListOfSongs />} />
+        <Route path="/uploadFiles" element={<UploadFiles/>} />
         <Route path="view" element={< SwitchToView />} />
       </Routes>
     </Context.Provider>

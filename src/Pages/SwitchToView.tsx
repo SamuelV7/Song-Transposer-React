@@ -1,5 +1,5 @@
 import React from 'react'
-import HomePage from './HomePage'
+import UploadFiles from './UploadFiles'
 import { Context } from "../App";
 import LyricsChord from './LyricsChord';
 export default function SwitchToView() {
@@ -13,7 +13,7 @@ export default function SwitchToView() {
     }
   return (
     <>
-        <HomePage/>
+        <UploadFiles/>
     </>
   )
 }
