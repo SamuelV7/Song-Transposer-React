@@ -1,1 +1,3 @@
-<h1>Song View</h1>
+<div class="container vstack" style="padding: 3px;">
+    Song Goes here
+</div>
