@@ -2,7 +2,6 @@
     export let songName : string
     let songLyrics : string
     $: song = songName
-    $: songLyrics : String
 </script>
 <div>
     <div class="container vstack">
